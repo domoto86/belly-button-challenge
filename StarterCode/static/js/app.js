@@ -4,7 +4,7 @@ d3.json(url).then((data) => {
 })
 
 
-function sample_charts(sample_id) {
+function sampleCharts(sample_id) {
     d3.json(url).then((data) => {
         console.log(data.samples)
         
@@ -55,6 +55,54 @@ function sample_charts(sample_id) {
         }
     }]
 
-    var bubbleLayout = {}
+    var bubbleLayout = {
+        title: `Sample Display by Individual`,
+        hovermode: 'closest',
+        xaxis: {title: 'OTU ID'}
+    }
+
+    Plotly.newPlot('bubble', bubbleChart, bubbleLayout)
     })
 }
+
+function sampleMeta (sample_id) {
+    d3.json(url).then((data) => {
+        var metaData = data.metadata
+        var metaID = metaData.filter(sample => sample.id == sample_id)
+        var metaFirst = metaID[0]
+        var metaWfr = metaFirst.wfreq
+
+        d3.select('#sample-metadata').html('')
+
+        Object.entries(metaFirst).forEach(([key, value]) => {
+            console.log(key, value)
+            d3.select('#sample-metadata').append('h5').text(`${key}: ${value}`)
+        })
+    })
+}
+
+// Dropdown Menu
+function init() {
+    var dropDownmenu = d3.select('#selDataset')
+    d3.json(url).then((data) => {
+        var sampleName = data.names
+        for (let i = 0; i < data.names.length; i++) {
+            names = data.names[i]
+            console.log(names)
+            dropDownmenu
+            .append('option')
+            .text(names)
+            .property('value', names)
+        }
+        
+        const defaultSample = sampleName[0]
+        sampleCharts(defaultSample)
+        sampleMeta(defaultSample)
+    })
+}
+
+function optionChanged(next_Sample) {
+    sampleCharts(next_Sample)
+    sampleMeta(next_Sample)
+    }
+    init ()
